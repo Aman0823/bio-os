@@ -1,0 +1,92 @@
+{
+	"easycom": {
+		"custom": {
+			"^u--(.*)": "uview-plus/components/u-$1/u-$1.vue",
+			"^up-(.*)": "uview-plus/components/u-$1/u-$1.vue",
+			"^u-([^-].*)": "uview-plus/components/u-$1/u-$1.vue"
+		}
+	},
+	"pages": [ //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
+		{
+			"path": "pages/index/index",
+			"style": {
+				"navigationBarTitleText": ""
+			}
+		},
+		{
+			"path": "pages/home/home",
+			"style": {
+				"navigationBarTitleText": ""
+			}
+		},
+		{
+			"path": "pages/account/account",
+			"style": {
+				"navigationBarTitleText": ""
+			}
+		},
+		{
+			"path": "pages/login/login",
+			"style": {
+				"navigationBarTitleText": ""
+			}
+		},
+		{
+			"path": "pages/message/message",
+			"style": {
+				"navigationBarTitleText": ""
+			}
+		},
+		{
+			"path": "pages/workspace/workspace",
+			"style": {
+				"navigationBarTitleText": ""
+			}
+		},
+		{
+			"path": "pages/newWorkspace/newWorkspace",
+			"style": {
+				"navigationBarTitleText": ""
+			}
+		}
+	],
+	"globalStyle": {
+		"navigationBarTextStyle": "black",
+		"navigationBarTitleText": "uni-app",
+		"navigationBarBackgroundColor": "#F8F8F8",
+		"backgroundColor": "#F8F8F8"
+	},
+	"uniIdRouter": {},
+	"tabBar": {
+		"selectedColor": "#4281ff",
+		"list": [
+
+			{
+				"iconPath": "static/home-3-line.png",
+				"text": "首页",
+				"pagePath": "pages/home/home",
+				"selectedIconPath": "static/home-3-line1.png"
+
+			},
+			{
+				"iconPath": "static/code.png",
+				"text": "工作台",
+				"pagePath": "pages/workspace/workspace",
+				"selectedIconPath": "static/code1.png"
+			},
+			{
+				"iconPath": "static/message.png",
+				"text": "消息",
+				"pagePath": "pages/message/message",
+				"selectedIconPath": "static/message1.png"
+			},
+			{
+				"iconPath": "static/account.png",
+				"text": "个人",
+				"pagePath": "pages/account/account",
+				"selectedIconPath": "static/account1.png"
+			}
+		]
+	}
+
+}

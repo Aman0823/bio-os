@@ -1,0 +1,1 @@
+<view class="select"><view class="select-list"><view wx:for="{{a}}" wx:for-item="item" wx:key="d" class="list-item" bindtap="{{item.e}}"><view class="left"><image src="{{item.a}}" class="img" alt=""/><view class="text"><view class="title">{{item.b}}</view><view class="content">{{item.c}}</view></view></view></view></view></view>

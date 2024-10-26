@@ -1,0 +1,47 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/home/home",
+    "pages/account/account",
+    "pages/login/login",
+    "pages/message/message",
+    "pages/workspace/workspace",
+    "pages/newWorkspace/newWorkspace"
+  ],
+  "window": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "uni-app",
+    "navigationBarBackgroundColor": "#F8F8F8",
+    "backgroundColor": "#F8F8F8"
+  },
+  "tabBar": {
+    "selectedColor": "#4281ff",
+    "list": [
+      {
+        "iconPath": "static/home-3-line.png",
+        "text": "首页",
+        "pagePath": "pages/home/home",
+        "selectedIconPath": "static/home-3-line1.png"
+      },
+      {
+        "iconPath": "static/code.png",
+        "text": "工作台",
+        "pagePath": "pages/workspace/workspace",
+        "selectedIconPath": "static/code1.png"
+      },
+      {
+        "iconPath": "static/message.png",
+        "text": "消息",
+        "pagePath": "pages/message/message",
+        "selectedIconPath": "static/message1.png"
+      },
+      {
+        "iconPath": "static/account.png",
+        "text": "个人",
+        "pagePath": "pages/account/account",
+        "selectedIconPath": "static/account1.png"
+      }
+    ]
+  },
+  "usingComponents": {}
+}

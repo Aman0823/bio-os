@@ -1,0 +1,10 @@
+
+.container {
+		padding: 20px;
+}
+.form-item {
+		margin-bottom: 15px;
+}
+.error {
+		color: red;
+}
