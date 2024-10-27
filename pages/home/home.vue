@@ -5,7 +5,7 @@
 		<h2 class="title">Hi,欢迎来到生信操作系统Bio-OS</h2>
 	</div>
 	<!-- 头部结束 -->
-	
+
 	<!-- 功能列表开始 -->
 	<div class="list">
 		<div class="i" v-for="(item,index) in List" :key="index" @click="handleTap(item.bindTap)">
@@ -19,76 +19,173 @@
 		</div>
 	</div>
 	<!-- 功能列表结束 -->
-	
+
 	<!-- 工作流list开始 -->
-	<div class="workflow-list">
+	<div class="workspace-list">
 		<h1 style="margin-bottom: 10rpx;">最近访问的Workspace</h1>
-		<div class="list2" v-for="(item,index) in workflowList" :key="index" @click="handleTap(item.bindTap)">
+		<div class="list2" v-for="(item,index) in workspaceList" :key="index" @click="handleTap(index)">
 			<div class="list2-item">
 				<div class="name">{{ item.name }}</div>
 				<div class="time">{{ item.time }}</div>
 			</div>
 		</div>
-		<div class="new-workflow" @click="onClickNew">
+		<div class="new-workspace" @click="onClickNew">
 			<div class="plus">+</div>
 			<div class="text">新建Workspace</div>
 		</div>
 	</div>
 	<!-- 工作流list结束 -->
-	
-	
+
+
 </template>
 
 <script>
 	export default {
 		data() {
 			return {
-				List:[
-					{ iconurl:'/static/workspace.png',title:"Workspace",bindTap:'workspace',num:0},
-					{ iconurl:'/static/工作流.png',title:"工作流",bindTap:'workflow',num:0},
-					{ iconurl:'/static/notebook.png',title:"NoteBook",bindTap:'notebook',num:0}
+				List: [{
+						iconurl: '/static/workspace.png',
+						title: "Workspace",
+						bindTap: 'workspace',
+						num: 0
+					},
+					{
+						iconurl: '/static/工作流.png',
+						title: "工作流",
+						bindTap: 'workflow',
+						num: 0
+					},
+					{
+						iconurl: '/static/notebook.png',
+						title: "NoteBook",
+						bindTap: 'notebook',
+						num: 0
+					}
 				],
-				workflowList:[
-					{name:'workspace1',time:'2024-08-09',bindTap:'workspace'},
-					{name:'workspace2',time:'2024-08-09',bindTap:'workspace2'},
+				workspaceList: [
+					{
+						name: 'workspace1',
+						time: '2024-08-09',
+						bindTap: 'workspace'
+					},
+					{
+						name: 'workspace2',
+						time: '2024-08-09',
+						bindTap: 'workspace2'
+					},
 				]
-				
+
 			}
 		},
-		
+		mounted() {
+			const token = JSON.parse(uni.getStorageSync('userData')).access_token;
+			console.log(token);
+
+			if (token) {
+				// 定义一个异步函数来封装请求逻辑  
+				async function fetchData() {
+					try {
+						// 获取工作空间  
+						const worksapcesResponse = await uni.request({
+							url: 'http://localhost:5000/list_workspaces',
+							method: 'GET',
+							header: {
+								'Authorization': `Bearer ${token}`,
+								'Content-Type': 'application/json'
+							}
+						});
+						console.log('请求成功，返回工作空间数据：', worksapcesResponse.data);
+						// 假设 worksapcesResponse.data 是您已经获取到的数据对象  
+						const workspacesData = worksapcesResponse.data;  
+						  
+						// 将数据对象转换为JSON字符串并存储到本地存储中  
+						uni.setStorageSync('workspacesData', JSON.stringify(workspacesData));
+						
+						const worksapces = worksapcesResponse.data;
+						console.log(workspacesData)
+						
+						this.List[0].num = worksapces.TotalCount; 
+						this.TotalCount = worksapces.TotalCount;   
+
+						let totalWorkflowCount = 0; // 用于累加所有工作流的总数  
+						let cnt = 0;
+						 
+						for (const workspace of worksapces.Items || []) { 
+							try {
+								const workflowResponse = await uni.request({
+									url: 'http://localhost:5000/list_workflows',
+									method: 'POST',
+									header: {
+										'Authorization': `Bearer ${token}`,
+										'Content-Type': 'application/json'
+									},
+									data: {
+										WorkspaceID: workspace.ID, // 使用当前工作空间的 ID  
+										SortBy: "CreateTime",
+										PageNumber: 1,
+										PageSize: 10,
+										SortOrder: "Desc"
+									}
+								});
+								console.log('请求成功，返回工作流数据：', workflowResponse.data);
+								
+								// 累加当前工作空间的工作流总数  
+								totalWorkflowCount += workflowResponse.data.TotalCount || 0;   
+								this.workspaceList[cnt].name = worksapces.Items[cnt].Name
+								this.workspaceList[cnt].time = new Date(worksapces.Items[cnt].UpdateTime * 1000).toLocaleString()
+								cnt++;
+							} catch (workflowErr) {
+								console.error('获取工作流失败：', workflowErr);
+							}
+						}
+
+						// 将所有工作流的总数设置到 this.List[1].num  
+						this.List[1].num = totalWorkflowCount;
+
+					} catch (err) {
+						console.error('请求失败：', err);
+					}
+				}
+
+				// 调用异步函数 
+				fetchData.call(this);
+			}
+		},
 		methods: {
-			
-			onClickNew(){
+
+			onClickNew() {
 				uni.navigateTo({
-					url:"/pages/newWorkspace/newWorkspace"
+					url: "/pages/newWorkspace/newWorkspace"
 				})
 				console.log("success, 选择创建方式")
 			},
-			workspace(){
-				this.workflowList[0].time = new Date().toLocaleString(); // 修改为当前时间  
-				console.log("success, 修改时间为: " + this.workflowList[0].time); 
-				console.log("Handling workspace tap");  
-			},
-			workspace2(){
-				this.workflowList[1].time = new Date().toLocaleString(); // 修改为当前时间  
-				console.log("success, 修改时间为: " + this.workflowList[1].time); 
-				console.log("Handling workspace tap");  
-			},
-			handleTap(bindTap) {  
-			        if (bindTap === 'workspace') {  
-			            this.workspace();  
-			        } else if (bindTap === 'workspace2') {  
-			            this.workspace2();
-			            
-			        }  
-			        // 添加更多的条件以处理其他bindTap值  
-			    }  
+			handleTap(index) {
+				console.log("你点击了" + index);
+				const workspacesDataStr = uni.getStorageSync('workspacesData');
+				const workspacesData = JSON.parse(workspacesDataStr);
+				
+				console.log("workspace名称为-----", workspacesData.Items[index].Name)
+				
+				let name = workspacesData.Items[index].Name;
+				console.log("workspace名称为-----", name);
+				
+				// 如果您确实需要存储这个值，可以这样做：  
+				uni.setStorageSync('workname', name);
+				
+				// 立即检索并打印出来以确认存储是否成功（这一步是可选的）  
+				let retrievedName = uni.getStorageSync('workname');
+				console.log("从存储中检索到的名字是：", retrievedName);
+				uni.navigateTo({
+					url: `/pages/workspace-detail/workspace-detail?index=${index}&workspaceName=${name}`
+				});
+				
+			}
 		}
 	}
 </script>
 
 <style>
-	.header{
+	.header {
 		height: 340rpx;
 		width: 700rpx;
 		background-color: #f2f7fe;
@@ -97,27 +194,31 @@
 		margin-top: 20rpx;
 		border-radius: 3%;
 	}
-	.header .image{
+
+	.header .image {
 		float: right;
 		height: 340rpx;
 		width: 550rpx;
 		background-color: #a7dafd;
 		border-radius: 0 3% 3% 0;
 
-		
+
 	}
-	.header .title{
+
+	.header .title {
 		padding-top: 50rpx;
 		margin-left: 20rpx;
 		position: absolute;
 		z-index: 1;
 
 	}
-	.list{
+
+	.list {
 		margin-top: 20rpx;
 		text-align: center;
 	}
-	.i{
+
+	.i {
 		width: 700rpx;
 		height: 145rpx;
 		background-color: #f6f8fa;
@@ -125,67 +226,77 @@
 		display: inline-block;
 		border-radius: 3%;
 	}
-	.i .left{
+
+	.i .left {
 		float: left;
 		padding-left: 25rpx;
 		display: flex;
 		padding-top: 20rpx;
 	}
-	.left .icon{
+
+	.left .icon {
 		height: 100rpx;
 		width: 100rpx;
 		padding-right: 15rpx;
 	}
-	.i .right{
+
+	.i .right {
 		float: right;
 		padding-right: 60rpx;
 		padding-top: 40rpx;
 		display: flex;
 	}
-	.right .num{
+
+	.right .num {
 		font-size: 1.5rem;
 	}
-	
-	.workflow-list{
+
+	.workspace-list {
 		display: block;
 		margin: 0 auto;
 		width: 700rpx;
 	}
-	.workflow-list .list2-item{
+
+	.workspace-list .list2-item {
 		height: 175rpx;
 		width: 100%;
 		background-color: #e8f4ff;
 		border-radius: 3%;
 		margin-bottom: 15rpx;
-		box-shadow:2px 2px 3px #9c9c9c;
+		box-shadow: 2px 2px 3px #9c9c9c;
 	}
-	.list2-item .name{
+
+	.list2-item .name {
 		padding-left: 30rpx;
 		color: #2064ff;
 		padding-top: 20rpx;
 		font-weight: 600;
-		
+
 	}
-	.list2-item .time{
+
+	.list2-item .time {
 		float: right;
 		padding-top: 40rpx;
 		padding-right: 20rpx;
 		font-size: 26rpx;
 	}
-	.new-workflow{
+
+	.new-workspace {
 		height: 175rpx;
 		background-color: #f6f8fa;
-		box-shadow:2px 2px 3px #9c9c9c;
+		box-shadow: 2px 2px 3px #9c9c9c;
 		display: block;
 		margin: 0 auto;
 		width: 700rpx;
 		border-radius: 3%;
 	}
-	.new-workflow .plus{
+
+	.new-workspace .plus {
 		font-size: 2em;
 		text-align: center;
 	}
-	.new-workflow .text{
+
+	.new-workspace .text {
 		text-align: center;
 		color: #42464e;
 	}
