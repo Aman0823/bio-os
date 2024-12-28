@@ -49,7 +49,7 @@
 				const workspacesData = JSON.parse(workspacesDataStr);
 				console.log(token);
 				console.log(workspacesData);
-				this.transformWorkspacesData(workspacesData); // 直接传递解析后的数据  
+				this.transformWorkspacesData(workspacesData);
 			} else {
 				console.error('未找到存储的workspacesData');
 			}
@@ -78,26 +78,50 @@
 				console.log("你点击了" + index);
 				const workspacesDataStr = uni.getStorageSync('workspacesData');
 				const workspacesData = JSON.parse(workspacesDataStr);
-				
-				uni.setStorageSync('workflowindex',index);
+
+				uni.setStorageSync('workflowindex', index);
 				let i = uni.getStorageSync('workflowindex');
-				console.log("索引是,",i)
+				console.log("索引是,", i)
 				console.log("workspace名称为-----", workspacesData.Items[index].Name)
 
 				let name = workspacesData.Items[index].Name;
 				console.log("workspace名称为-----", name);
-
-				// 如果您确实需要存储这个值，可以这样做：  
 				uni.setStorageSync('workname', name);
-
-				// 立即检索并打印出来以确认存储是否成功（这一步是可选的）  
 				let retrievedName = uni.getStorageSync('workname');
 				console.log("从存储中检索到的名字是：", retrievedName);
 				uni.navigateTo({
 					url: `/pages/workspace-detail/workspace-detail?index=${index}&workspaceName=${name}`
 				});
 
-			}
+			},
+			transformWorkspacesData(data) {
+				this.workspaceList = data.Items.map(item => ({
+					name: item.Name,
+					time: new Date(item.UpdateTime * 1000).toLocaleString(),
+					createTime: item.CreateTime, // 保存创建时间戳  
+					updateTime: item.UpdateTime // 保存修改时间戳  
+				}));
+			},
+			bindPickerChange: function(e) {
+				console.log('picker发送选择改变，携带值为', e.detail.value);
+				this.index = e.detail.value;
+				this.sortWorkspaceList(); // 调用排序方法  
+			},
+			sortWorkspaceList() {
+				switch (this.index) {
+					case 0: // 按访问时间排序  
+						this.workspaceList.sort((a, b) => b.updateTime - a.updateTime);
+						break;
+					case 1: // 按名称排序  
+						this.workspaceList.sort((a, b) => a.name.localeCompare(b.name));
+						break;
+					case 2: // 按创建时间排序  
+						this.workspaceList.sort((a, b) => b.createTime - a.createTime);
+						break;
+					default:
+						break;
+				}
+			},
 		}
 	}
 </script>

@@ -62,8 +62,7 @@
 						num: 0
 					}
 				],
-				workspaceList: [
-					{
+				workspaceList: [{
 						name: 'workspace1',
 						time: '2024-08-09',
 						bindTap: 'workspace'
@@ -79,13 +78,10 @@
 		},
 		mounted() {
 			const token = JSON.parse(uni.getStorageSync('userData')).access_token;
-			console.log(token);
-
+			console.log(this.token);
 			if (token) {
-				// 定义一个异步函数来封装请求逻辑  
 				async function fetchData() {
 					try {
-						// 获取工作空间  
 						const worksapcesResponse = await uni.request({
 							url: 'http://localhost:5000/list_workspaces',
 							method: 'GET',
@@ -95,23 +91,25 @@
 							}
 						});
 						console.log('请求成功，返回工作空间数据：', worksapcesResponse.data);
-						// 假设 worksapcesResponse.data 是您已经获取到的数据对象  
-						const workspacesData = worksapcesResponse.data;  
-						  
-						// 将数据对象转换为JSON字符串并存储到本地存储中  
+						const workspacesData = worksapcesResponse.data;
 						uni.setStorageSync('workspacesData', JSON.stringify(workspacesData));
-						
+
 						const worksapces = worksapcesResponse.data;
-						console.log(workspacesData)
-						
-						this.List[0].num = worksapces.TotalCount; 
-						this.TotalCount = worksapces.TotalCount;   
+						console.log(workspacesData);
+
+						this.List[0].num = worksapces.TotalCount;
+						this.TotalCount = worksapces.TotalCount;
 
 						let totalWorkflowCount = 0; // 用于累加所有工作流的总数  
+						let totalNotebookCount = 0; // 用于累加所有笔记本的总数  
 						let cnt = 0;
-						 
-						for (const workspace of worksapces.Items || []) { 
+
+						const workspaceIDs = []; // 用于保存 WorkspaceID  
+
+						for (const workspace of worksapces.Items || []) {
 							try {
+								workspaceIDs.push(workspace.ID); // 保存 WorkspaceID  
+
 								const workflowResponse = await uni.request({
 									url: 'http://localhost:5000/list_workflows',
 									method: 'POST',
@@ -128,11 +126,12 @@
 									}
 								});
 								console.log('请求成功，返回工作流数据：', workflowResponse.data);
-								
+
 								// 累加当前工作空间的工作流总数  
-								totalWorkflowCount += workflowResponse.data.TotalCount || 0;   
-								this.workspaceList[cnt].name = worksapces.Items[cnt].Name
-								this.workspaceList[cnt].time = new Date(worksapces.Items[cnt].UpdateTime * 1000).toLocaleString()
+								totalWorkflowCount += workflowResponse.data.TotalCount || 0;
+								this.workspaceList[cnt].name = worksapces.Items[cnt].Name;
+								this.workspaceList[cnt].time = new Date(worksapces.Items[cnt].UpdateTime * 1000)
+									.toLocaleString();
 								cnt++;
 							} catch (workflowErr) {
 								console.error('获取工作流失败：', workflowErr);
@@ -142,12 +141,36 @@
 						// 将所有工作流的总数设置到 this.List[1].num  
 						this.List[1].num = totalWorkflowCount;
 
+						// 循环调用 list_notebook_servers 接口  
+						for (const workspaceID of workspaceIDs) {
+							try {
+								const notebookResponse = await uni.request({
+									url: `http://127.0.0.1:5000/list_notebook_servers?WorkspaceID=${workspaceID}`,
+									method: 'GET',
+									header: {
+										'Authorization': `Bearer ${token}`,
+										'Content-Type': 'application/json'
+									}
+								});
+								console.log(workspaceID)
+								console.log('请求成功，返回笔记本服务器数据：', notebookResponse.data);
+
+								// 累加当前工作空间的笔记本总数  
+								totalNotebookCount += notebookResponse.data.TotalCount || 0;
+							} catch (notebookErr) {
+								console.error('获取笔记本服务器失败：', notebookErr);
+							}
+						}
+
+						// 将所有笔记本的总数设置到 this.List[2].num  
+						this.List[2].num = totalNotebookCount;
+
 					} catch (err) {
 						console.error('请求失败：', err);
 					}
 				}
 
-				// 调用异步函数 
+				// 调用异步函数   
 				fetchData.call(this);
 			}
 		},
@@ -163,22 +186,18 @@
 				console.log("你点击了" + index);
 				const workspacesDataStr = uni.getStorageSync('workspacesData');
 				const workspacesData = JSON.parse(workspacesDataStr);
-				
+
 				console.log("workspace名称为-----", workspacesData.Items[index].Name)
-				
+
 				let name = workspacesData.Items[index].Name;
 				console.log("workspace名称为-----", name);
-				
-				// 如果您确实需要存储这个值，可以这样做：  
 				uni.setStorageSync('workname', name);
-				
-				// 立即检索并打印出来以确认存储是否成功（这一步是可选的）  
 				let retrievedName = uni.getStorageSync('workname');
 				console.log("从存储中检索到的名字是：", retrievedName);
 				uni.navigateTo({
 					url: `/pages/workspace-detail/workspace-detail?index=${index}&workspaceName=${name}`
 				});
-				
+
 			}
 		}
 	}

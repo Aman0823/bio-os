@@ -73,11 +73,18 @@
 			}
 		},
 		methods: {
+			handleTap(tapMethod) {
+				if (tapMethod === 'exitLogin') {
+					this.exitLogin(); // 调用退出登录方法  
+				} else {
+					this[tapMethod](); // 调用其他方法（如 acountManage, security 等）  
+				}
+			},
 			setGlobal() {
 				uni.navigateTo({
 					url: "/pages/setaksk/setaksk"
 				})
-			}
+			},
 			// aountManage(){
 
 			// },
@@ -89,7 +96,28 @@
 			// cloud(){},
 			// center(){},
 			// resources(){},
-			// exitLogin(){}
+			confirmExitLogin() {
+				// 使用 Element UI 的 Message Box 显示确认对话框  
+				this.$confirm('您确定要退出登录吗？', '警告', {
+						confirmButtonText: '确定',
+						cancelButtonText: '取消',
+						type: 'warning',
+					})
+					.then(() => {
+						this.exitLogin(); // 用户确认后调用退出登录逻辑  
+					})
+					.catch(() => {
+						this.$message({
+							type: 'info',
+							message: '已取消退出登录',
+						});
+					});
+			},
+			exitLogin() {
+				localStorage.removeItem('access_token');
+				// 跳转到登录页面  
+				this.$router.push('/pages/login/login').catch(err => err); // 处理未匹配的导航错误  
+			}
 		}
 	}
 </script>
@@ -184,7 +212,7 @@
 		margin: 24rpx 0;
 	}
 
-	.userItemListView>view {
+	.userItemListView>div {
 		height: 94rpx;
 		line-height: 94rpx;
 		padding-left: 50rpx;
@@ -193,7 +221,7 @@
 	}
 
 	/* 移除最后一个元素的下边框 */
-	.userItemListView>view:last-child {
+	.userItemListView>div:last-child {
 		border: none;
 	}
 </style>

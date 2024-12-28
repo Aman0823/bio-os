@@ -42,7 +42,7 @@
 						id: '2'
 					},
 				],
-				barContentList: [], // 初始化barContentList  
+				barContentList: [],  
 			};
 		},
 		mounted() {
@@ -110,10 +110,8 @@
 	.tabName {
 		text-align: center;
 		width: 33.33%;
-		/* 修改为百分比以确保三个标签均匀分布 */
 		display: inline-block;
 		height: 50px;
-		/* 修改为px或其他标准单位 */
 		line-height: 50px;
 		white-space: nowrap;
 	}
@@ -128,6 +126,4 @@
 		background-color: #4281ff;
 		color: #ffffff;
 	}
-
-	/* #tabContent 样式已移除，因为未在模板中使用该ID */
 </style>
